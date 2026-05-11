@@ -52,11 +52,7 @@ const AREAS = [
   "অন্যান্য (Others)",
 ];
 
-const TUTOR_QUALIFICATIONS = [
-  "Honours/Masters in Subject",
-  "Engineer/Doctor Background",
-  "Any University Background",
-];
+
 
 const TUTOR_EXPERIENCE = [
   "Fresh/New",
@@ -187,6 +183,50 @@ export default function MagicForm() {
         status: "pending",
         createdAt: serverTimestamp(),
       });
+
+      /* ── Discord Webhook Alert (silent background execution) ── */
+      // https://discord.com/api/webhooks/1503434920398160074/tCnOWir96W6Cqqbl2OKCtu6BMgkYp2Lp3Qrcq5cElTO1KGlvYZxAgFlc3lfD91l_kmBy
+      try {
+        const DISCORD_WEBHOOK_URL =
+          "https://discord.com/api/webhooks/1503434920398160074/tCnOWir96W6Cqqbl2OKCtu6BMgkYp2Lp3Qrcq5cElTO1KGlvYZxAgFlc3lfD91l_kmBy";
+
+        const discordPayload = {
+          username: "Tutors Kushtia",
+          avatar_url: "https://tutors-kushtia.vercel.app/favicon.ico",
+          embeds: [
+            {
+              title: "🚀 New Tuition Request!",
+              color: 5201637, // Indigo #4F46E5
+              fields: [
+                { name: "📚 Class",       value: formData.classLevel || "—",           inline: true },
+                { name: "📝 Subject",     value: formData.subject || "—",              inline: true },
+                { name: "📍 Area",        value: formData.area || "—",                 inline: true },
+                { name: "👤 Tutor Pref",  value: formData.tutorPreference || "—",      inline: true },
+                { name: "🎓 Qualification", value: formData.qualification || "—",      inline: true },
+                { name: "⏳ Experience",  value: formData.experience || "—",            inline: true },
+                { name: "💰 Salary",      value: formData.salary || "N/A",             inline: true },
+                { name: "🕐 Time",        value: formData.preferredTime || "N/A",      inline: true },
+                { name: "📱 Phone",       value: `\`${formData.phone}\``,              inline: true },
+                { name: "🏠 Address",     value: formData.address || "—",              inline: false },
+              ],
+              footer: { text: "Tutors Kushtia Admin System" },
+              timestamp: new Date().toISOString(),
+            },
+          ],
+        };
+
+        // Fire-and-forget: don't await, don't block UI
+        fetch(DISCORD_WEBHOOK_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(discordPayload),
+        }).catch(() => {
+          // Silently ignore Discord webhook errors
+        });
+      } catch {
+        // Silently ignore any notification errors
+      }
+
       setIsSubmitting(false);
       setSubmitted(true);
     } catch (error) {
@@ -328,15 +368,23 @@ export default function MagicForm() {
 
                   {/* Row 3: Qualification & Experience */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                    <CustomSelect
-                      id="select-qualification"
-                      label="টিউটরের যোগ্যতা"
-                      icon="🎓"
-                      options={TUTOR_QUALIFICATIONS}
-                      value={formData.qualification}
-                      onChange={(v) => setFormData({ ...formData, qualification: v })}
-                      placeholder="যোগ্যতা নির্বাচন করুন"
-                    />
+                    <div className="space-y-2">
+                      <label
+                        htmlFor="input-qualification"
+                        className="flex items-center gap-2 text-sm font-semibold text-[#374151] font-['Hind_Siliguri']"
+                      >
+                        <span>🎓</span>
+                        টিউটরের যোগ্যতা
+                      </label>
+                      <input
+                        id="input-qualification"
+                        type="text"
+                        placeholder="যেমন: Honours, Masters, Engineer..."
+                        value={formData.qualification}
+                        onChange={(e) => setFormData({ ...formData, qualification: e.target.value })}
+                        className="w-full px-4 py-3.5 bg-[#F9FAFB] border border-[#E5E7EB] rounded-xl text-[#111827] text-base font-['Hind_Siliguri'] focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/30 focus:border-[#4F46E5] transition-all duration-200 placeholder:text-[#9CA3AF]"
+                      />
+                    </div>
                     <CustomSelect
                       id="select-experience"
                       label="টিউটরের অভিজ্ঞতা"

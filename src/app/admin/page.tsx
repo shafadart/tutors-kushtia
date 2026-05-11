@@ -10,7 +10,10 @@ import {
   deleteDoc,
   Timestamp,
 } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { signOut } from "firebase/auth";
+import { db, auth } from "@/lib/firebase";
+import { useAuth } from "@/lib/AuthContext";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 /* ── Types ── */
@@ -73,13 +76,23 @@ function StatCard({ label, value, icon, color }: { label: string; value: number;
 }
 
 export default function AdminPage() {
+  const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
   const [requests, setRequests] = useState<TuitionRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "pending" | "approved" | "rejected">("all");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
+  /* ── Auth Guard: redirect to login if not authenticated ── */
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.replace("/admin/login");
+    }
+  }, [authLoading, user, router]);
+
   /* ── Real-time Firestore listener ── */
   useEffect(() => {
+    if (!user) return; // Don't subscribe if not logged in
     const unsubscribe = onSnapshot(
       collection(db, "tuition_requests"),
       (snapshot) => {
@@ -103,7 +116,28 @@ export default function AdminPage() {
     );
 
     return () => unsubscribe();
-  }, []);
+  }, [user]);
+
+  /* ── Logout handler ── */
+  const handleLogout = async () => {
+    await signOut(auth);
+    router.replace("/admin/login");
+  };
+
+  /* ── Show loading spinner during auth check ── */
+  if (authLoading || !user) {
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#312E81] via-[#4F46E5] to-[#6366F1]">
+        <div className="flex flex-col items-center gap-4">
+          <svg className="animate-spin w-10 h-10 text-white/80" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" fill="none" strokeDasharray="31.4" strokeDashoffset="10" />
+          </svg>
+          <span className="text-sm text-white/50 font-['Hind_Siliguri']">অনুগ্রহ করে অপেক্ষা করুন...</span>
+        </div>
+      </main>
+    );
+  }
+
 
   /* ── Actions ── */
   const handleApprove = async (id: string) => {
@@ -175,15 +209,26 @@ export default function AdminPage() {
               <p className="text-white/60 text-xs font-['Hind_Siliguri']">Tutor&apos;s Kushtia</p>
             </div>
           </div>
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-white/15 hover:bg-white/25 text-white text-sm font-semibold rounded-lg transition-all font-['Hind_Siliguri']"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            হোম পেজ
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-white/15 hover:bg-white/25 text-white text-sm font-semibold rounded-lg transition-all font-['Hind_Siliguri']"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              হোম পেজ
+            </Link>
+            <button
+              onClick={handleLogout}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-red-500/20 hover:bg-red-500/40 text-white text-sm font-semibold rounded-lg transition-all cursor-pointer"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+              </svg>
+              Logout
+            </button>
+          </div>
         </div>
       </nav>
 
