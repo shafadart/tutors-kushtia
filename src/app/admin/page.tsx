@@ -144,6 +144,21 @@ export default function AdminPage() {
     setActionLoading(id);
     try {
       await updateDoc(doc(db, "tuition_requests", id), { status: "approved" });
+
+      // Send push notification to all tutors
+      const approvedReq = requests.find((r) => r.id === id);
+      if (approvedReq) {
+        fetch("/api/send-notification", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            tuitionId: id,
+            className: approvedReq.class,
+            subject: approvedReq.subject,
+            area: approvedReq.area,
+          }),
+        }).catch((err) => console.error("Notification send failed:", err));
+      }
     } catch (err) {
       console.error("Approve failed:", err);
     }
