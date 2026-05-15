@@ -195,11 +195,11 @@ export default function TuitionApplications() {
       // 3. Update live_tuitions status so it disappears from the board
       const liveTuitionRef = doc(db, "live_tuitions", app.tuitionId);
       // Using set with merge in case it was deleted
-      batch.update(liveTuitionRef, { status: "assigned" }).catch(() => {});
+      batch.update(liveTuitionRef, { status: "assigned" });
 
       // Update original tuition_requests status as well
       const tuitionReqRef = doc(db, "tuition_requests", app.tuitionId);
-      batch.update(tuitionReqRef, { status: "assigned" }).catch(() => {});
+      batch.update(tuitionReqRef, { status: "assigned" });
 
       // 4. Update tuition_applications status
       const applicationRef = doc(db, "tuition_applications", app.id);
