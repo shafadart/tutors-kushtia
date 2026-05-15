@@ -7,7 +7,6 @@ if (!admin.apps.length) {
     credential: admin.credential.cert({
       projectId: process.env.FIREBASE_PROJECT_ID,
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      // Replace \\n with actual newlines in the private key
       privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
     }),
   });
@@ -15,23 +14,30 @@ if (!admin.apps.length) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { tuitionId, className, subject, area } = await req.json();
+    const { tutorId, title, body, data } = await req.json();
 
-    // Send FCM notification to all tutors subscribed to 'all_verified_tutors' topic
+    // Fetch the tutor's FCM token from Firestore
+    const tutorDoc = await admin.firestore().collection("tutors").doc(tutorId).get();
+    const tutorData = tutorDoc.data();
+
+    if (!tutorData || !tutorData.fcmToken) {
+      return NextResponse.json(
+        { success: false, error: "Tutor does not have an FCM token registered." },
+        { status: 404 }
+      );
+    }
+
     const message = await admin.messaging().send({
-      topic: "all_verified_tutors",
+      token: tutorData.fcmToken,
       notification: {
-        title: "🚀 নতুন টিউশন অ্যালার্ট!",
-        body: `${className} — ${subject} (${area}) এ একটি নতুন টিউশন পোস্ট হয়েছে।`,
+        title: title || "Tutor's Kushtia",
+        body: body || "You have a new notification.",
       },
-      data: {
-        tuitionId: tuitionId || "",
-        type: "new_tuition",
-      },
+      data: data || {},
       android: {
         priority: "high",
         notification: {
-          channelId: "tuition_alerts_channel",
+          channelId: "direct_alerts_channel",
           sound: "default",
         },
       },
@@ -39,7 +45,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, messageId: message });
   } catch (error: unknown) {
-    console.error("FCM Error:", error);
+    console.error("Direct FCM Error:", error);
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
       { success: false, error: errorMessage },
