@@ -36,6 +36,11 @@ interface TuitionRequest {
   preferredTime: string;
   status: string;
   createdAt: Timestamp | null;
+  days?: string;
+  studentGender?: string;
+  curriculum?: string;
+  studentCount?: string;
+  details?: string;
 }
 
 /* ── Status Badge ── */
