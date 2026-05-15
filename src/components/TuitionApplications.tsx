@@ -10,6 +10,7 @@ import {
   increment,
   Timestamp,
   updateDoc,
+  serverTimestamp,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
@@ -206,10 +207,21 @@ export default function TuitionApplications() {
       const applicationRef = doc(db, "tuition_applications", app.id);
       batch.update(applicationRef, { status: "assigned" });
 
+      // 5. Create Notification Record in Firestore
+      const newNotificationRef = doc(collection(db, "notifications"));
+      batch.set(newNotificationRef, {
+        tutorId: app.tutorId,
+        title: "🎉 অভিনন্দন!",
+        body: `আপনাকে ${app.tuition.class} এর ${app.tuition.subject} টিউশনটি প্রদান করা হয়েছে।`,
+        type: "direct",
+        isRead: false,
+        createdAt: serverTimestamp(),
+      });
+
       // Commit all DB changes
       await batch.commit();
 
-      // 5. Fire Push Notification to the specific Tutor
+      // 6. Fire Push Notification to the specific Tutor
       fetch("/api/send-direct-notification", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
