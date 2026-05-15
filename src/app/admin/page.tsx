@@ -20,6 +20,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import TutorVerification from "@/components/TutorVerification";
 import CoachingRequests from "@/components/CoachingRequests";
+import TuitionApplications from "@/components/TuitionApplications";
+
 
 /* ── Types ── */
 interface TuitionRequest {
@@ -92,7 +94,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "pending" | "approved" | "rejected">("all");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"requests" | "verify" | "coaching">("requests");
+  const [activeTab, setActiveTab] = useState<"requests" | "verify" | "coaching" | "applications">("requests");
 
   /* ── Auth Guard: redirect to login if not authenticated ── */
   useEffect(() => {
@@ -339,6 +341,19 @@ export default function AdminPage() {
             </svg>
             কোচিং রিকোয়েস্ট
           </button>
+          <button
+            onClick={() => setActiveTab("applications")}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold transition-all cursor-pointer whitespace-nowrap font-['Hind_Siliguri'] ${
+              activeTab === "applications"
+                ? "bg-[#4F46E5] text-white shadow-md shadow-[#4F46E5]/25"
+                : "text-[#6B7280] hover:text-[#4F46E5] hover:bg-[#4F46E5]/5"
+            }`}
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 00.75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 00-3.413-.387m4.5 8.006c-.194.225-.564.481-1.15.481M12 3v1m0 16v-1m9-9l-9 9m0 0l-9-9" />
+            </svg>
+            আবেদনসমূহ
+          </button>
         </div>
 
         {/* ── Tab: Tuition Requests ── */}
@@ -503,6 +518,9 @@ export default function AdminPage() {
 
         {/* ── Tab: Coaching Requests ── */}
         {activeTab === "coaching" && <CoachingRequests />}
+
+        {/* ── Tab: Tuition Applications ── */}
+        {activeTab === "applications" && <TuitionApplications />}
       </div>
     </main>
   );
