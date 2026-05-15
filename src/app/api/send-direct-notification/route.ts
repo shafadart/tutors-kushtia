@@ -1,18 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import admin from "firebase-admin";
 
-// Initialize Firebase Admin (only once)
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert({
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
-    }),
-  });
+// Initialize Firebase Admin lazily
+function initAdmin() {
+  if (!admin.apps.length && process.env.FIREBASE_PROJECT_ID) {
+    admin.initializeApp({
+      credential: admin.credential.cert({
+        projectId: process.env.FIREBASE_PROJECT_ID,
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+        privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+      }),
+    });
+  }
 }
 
 export async function POST(req: NextRequest) {
+  initAdmin();
   try {
     const { tutorId, title, body, data } = await req.json();
 
