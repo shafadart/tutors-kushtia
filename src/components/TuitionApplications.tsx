@@ -191,7 +191,7 @@ export default function TuitionApplications() {
       const tutorRef = doc(db, "tutors", app.tutorId);
       batch.update(tutorRef, {
         pendingPaymentTotal: increment(fee),
-        totalTuitionsReceived: increment(1)
+        totalTuitions: increment(1)
       });
 
       // 3. Update live_tuitions status so it disappears from the board
