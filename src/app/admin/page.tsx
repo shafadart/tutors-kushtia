@@ -21,6 +21,7 @@ import Link from "next/link";
 import TutorVerification from "@/components/TutorVerification";
 import CoachingRequests from "@/components/CoachingRequests";
 import TuitionApplications from "@/components/TuitionApplications";
+import PaymentRequests from "@/components/PaymentRequests";
 
 
 /* ── Types ── */
@@ -94,7 +95,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "pending" | "approved" | "rejected">("all");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"requests" | "verify" | "coaching" | "applications">("requests");
+  const [activeTab, setActiveTab] = useState<"requests" | "verify" | "coaching" | "applications" | "payments">("requests");
 
   /* ── Auth Guard: redirect to login if not authenticated ── */
   useEffect(() => {
@@ -354,6 +355,19 @@ export default function AdminPage() {
             </svg>
             আবেদনসমূহ
           </button>
+          <button
+            onClick={() => setActiveTab("payments")}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold transition-all cursor-pointer whitespace-nowrap font-['Hind_Siliguri'] ${
+              activeTab === "payments"
+                ? "bg-[#4F46E5] text-white shadow-md shadow-[#4F46E5]/25"
+                : "text-[#6B7280] hover:text-[#4F46E5] hover:bg-[#4F46E5]/5"
+            }`}
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
+            </svg>
+            পেমেন্ট
+          </button>
         </div>
 
         {/* ── Tab: Tuition Requests ── */}
@@ -521,6 +535,9 @@ export default function AdminPage() {
 
         {/* ── Tab: Tuition Applications ── */}
         {activeTab === "applications" && <TuitionApplications />}
+
+        {/* ── Tab: Payment Requests ── */}
+        {activeTab === "payments" && <PaymentRequests />}
       </div>
     </main>
   );
