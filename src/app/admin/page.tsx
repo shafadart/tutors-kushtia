@@ -38,6 +38,7 @@ interface TuitionRequest {
   tutorExperience: string;
   preferredTime: string;
   status: string;
+  source?: string;
   createdAt: Timestamp | null;
   days?: string;
   studentGender?: string;
@@ -63,6 +64,20 @@ function StatusBadge({ status }: { status: string }) {
   return (
     <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border ${styles[status] || styles.pending}`}>
       {labels[status] || status}
+    </span>
+  );
+}
+
+/* ── Source Badge ── */
+function SourceBadge({ source }: { source?: string }) {
+  const isApp = source === 'app';
+  return (
+    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+      isApp
+        ? 'bg-violet-500/10 text-violet-600 border-violet-500/20'
+        : 'bg-sky-500/10 text-sky-600 border-sky-500/20'
+    }`}>
+      {isApp ? '📱' : '🌐'} {isApp ? 'App' : 'Web'}
     </span>
   );
 }
@@ -421,7 +436,7 @@ export default function AdminPage() {
                   <table className="w-full text-left">
                     <thead>
                       <tr className="bg-[#F9FAFB] border-b border-[#E5E7EB]">
-                        {["শ্রেণি", "বিষয়", "এলাকা", "ফোন", "বেতন", "সময়", "স্ট্যাটাস", "তারিখ", "অ্যাকশন"].map((h) => (
+                        {["শ্রেণি", "বিষয়", "এলাকা", "ফোন", "বেতন", "সময়", "সোর্স", "স্ট্যাটাস", "তারিখ", "অ্যাকশন"].map((h) => (
                           <th key={h} className="px-4 py-3 text-xs font-bold text-[#6B7280] uppercase tracking-wide font-['Hind_Siliguri']">
                             {h}
                           </th>
@@ -444,6 +459,7 @@ export default function AdminPage() {
                             <td className="px-4 py-3 text-sm font-mono text-[#4F46E5] font-semibold">{req.guardianPhone}</td>
                             <td className="px-4 py-3 text-sm text-[#374151] font-['Hind_Siliguri']">{req.salary || "—"}</td>
                             <td className="px-4 py-3 text-sm text-[#374151]">{req.preferredTime || "—"}</td>
+                            <td className="px-4 py-3"><SourceBadge source={req.source} /></td>
                             <td className="px-4 py-3"><StatusBadge status={req.status} /></td>
                             <td className="px-4 py-3 text-xs text-[#9CA3AF] font-['Hind_Siliguri']">{formatDate(req.createdAt)}</td>
                             <td className="px-4 py-3">
@@ -493,6 +509,9 @@ export default function AdminPage() {
                           <p className="text-sm text-[#6B7280] font-['Hind_Siliguri']">📍 {req.area}</p>
                         </div>
                         <StatusBadge status={req.status} />
+                      </div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <SourceBadge source={req.source} />
                       </div>
                       <div className="grid grid-cols-2 gap-2 text-sm">
                         <div className="text-[#6B7280] font-['Hind_Siliguri']">📱 <span className="font-mono text-[#4F46E5] font-semibold">{req.guardianPhone}</span></div>
